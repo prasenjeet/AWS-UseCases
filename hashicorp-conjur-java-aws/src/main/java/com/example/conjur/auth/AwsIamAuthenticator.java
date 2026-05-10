@@ -16,9 +16,9 @@ import software.amazon.awssdk.regions.Region;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +63,8 @@ public class AwsIamAuthenticator implements ConjurAuthenticator {
         String token = postToConjur(signed);
 
         log.info("Successfully authenticated with Conjur (AWS IAM)");
-        return Base64.getEncoder().encodeToString(token.getBytes(StandardCharsets.UTF_8));
+        // Conjur returns the token already Base64-encoded (Accept-Encoding: base64)
+        return token;
     }
 
     /** Signs a GetCallerIdentity request using AWS SigV4. */
@@ -99,11 +100,12 @@ public class AwsIamAuthenticator implements ConjurAuthenticator {
 
     /** Sends the signed headers to Conjur's AWS authenticator endpoint. */
     private String postToConjur(AwsSignedRequest signed) {
+        String encodedLogin = URLEncoder.encode(config.getLogin(), StandardCharsets.UTF_8);
         String url = String.format("%s/authn-iam/%s/%s/%s/authenticate",
                 config.getApplianceUrl(),
                 config.getAwsServiceId(),
                 config.getAccount(),
-                config.getLogin());
+                encodedLogin);
 
         Map<String, String> payload = new HashMap<>();
         payload.put("host", signed.getHost());

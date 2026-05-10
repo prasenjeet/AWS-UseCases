@@ -8,15 +8,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 /**
  * Authenticates with Conjur using an API key.
  *
  * Flow:
  *   POST /authn/{account}/{login}/authenticate  with body = API key
- *   → Conjur returns a short-lived access token (raw JSON)
- *   → We Base64-encode it for use in subsequent requests
+ *   → With "Accept-Encoding: base64", Conjur returns the access token
+ *     already Base64-encoded, ready for the Authorization header
  */
 public class ApiKeyAuthenticator implements ConjurAuthenticator {
 
@@ -53,10 +52,9 @@ public class ApiKeyAuthenticator implements ConjurAuthenticator {
                         "Conjur API key authentication failed: HTTP " + response.code());
             }
             String token = response.body() != null ? response.body().string() : "";
-            // Conjur returns the token as a raw JSON string; Base64-encode for the Authorization header
-            String encoded = Base64.getEncoder().encodeToString(token.getBytes(StandardCharsets.UTF_8));
+            // Conjur returns the token already Base64-encoded (Accept-Encoding: base64)
             log.info("Successfully authenticated with Conjur (API key)");
-            return encoded;
+            return token;
         } catch (IOException e) {
             throw new ConjurAuthException("Network error during Conjur authentication", e);
         }
