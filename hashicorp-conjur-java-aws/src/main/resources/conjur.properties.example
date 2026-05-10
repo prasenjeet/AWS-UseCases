@@ -1,0 +1,15 @@
+# Conjur connection settings
+# Copy this file to conjur.properties and populate with real values (never commit credentials)
+
+CONJUR_APPLIANCE_URL=https://conjur.example.com
+CONJUR_ACCOUNT=myorg
+
+# For API key authentication
+CONJUR_AUTH_METHOD=API_KEY
+CONJUR_AUTHN_LOGIN=host/aws/my-ec2-instance
+CONJUR_AUTHN_API_KEY=<api-key-here>
+
+# For AWS IAM authentication (EC2 / ECS / Lambda)
+# CONJUR_AUTH_METHOD=AWS_IAM
+# CONJUR_AUTHN_LOGIN=host/aws/my-ec2-instance
+# CONJUR_AWS_SERVICE_ID=prod
